@@ -1,5 +1,8 @@
+pipeline/data
+
 **.cpython-39.pyc
 
 .env
 
 db.sqlite3
+**.pyc
