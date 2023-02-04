@@ -37,6 +37,7 @@ class TestDataset(unittest.TestCase):
 
         self.assertEqual(type(dataset[0]), dict)
         self.assertEqual(dataset[0]["instance_images"].shape, (4, 256, 256))
+        self.assertEqual(dataset[0]["instance_prompt_ids"].dim(), 1)
 
     def test_preprocessor(self):
         src_data_path = "./pipeline/data/Shields"

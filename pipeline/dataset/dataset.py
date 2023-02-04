@@ -1,4 +1,5 @@
 import os
+import torch
 
 from torch.utils.data import Dataset
 from PIL import Image
@@ -37,7 +38,11 @@ class DreamBoothDataset(Dataset):
         ).input_ids
 
         example["instance_images"] = self.transforms(image)
-        example["instance_prompt_ids"] = prompt_seq
+        example["instance_prompt_ids"] = torch.tensor(
+            prompt_seq,
+            dtype=torch.int64
+        )
+
         return example
 
     def __len__(self):
