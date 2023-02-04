@@ -1,5 +1,7 @@
 from .dataset import DreamBoothDataset
 from .transformation import (
     ImageTransform,
-    ImageReverseTransform
+    ImageReverseTransform,
+    PreprocessorTransform
 )
+from .preprocessor import Preprocessor

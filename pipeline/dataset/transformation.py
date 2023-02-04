@@ -1,10 +1,43 @@
 import torchvision.transforms as T
 import numpy as np
+import cv2
 
 from torch import Tensor
 from PIL import Image
 from typing import Tuple
 
+
+class PreprocessorTransform:
+    def __init__(
+        self,
+        background_color: Tuple[float, float, float],
+        size: Tuple[int, int]
+    ) -> None:
+        self.size = size
+        self.background_color = background_color
+
+    def add_padding(self, image):
+        h, w, _ = image.shape
+        padding = abs((h - w) // 2)
+        return cv2.copyMakeBorder(
+            image,
+            0,
+            0,
+            padding,
+            padding,
+            cv2.BORDER_CONSTANT,
+            value=[0, 0, 0]
+        )
+
+    def __call__(self, image: np.ndarray):
+        image = self.add_padding(image)
+        image = cv2.resize(
+            image,
+            self.size,
+            interpolation=cv2.INTER_NEAREST
+        )
+        image[image.sum(2) == 0] = self.background_color
+        return image
 
 class ImageTransform:
     def __init__(self, size: Tuple[int, int]) -> None:
