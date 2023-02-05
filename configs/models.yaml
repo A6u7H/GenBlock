@@ -1,0 +1,18 @@
+tokenizer:
+  pretrained_model_name_or_path: CompVis/stable-diffusion-v1-4
+  subfolder: tokenizer
+
+clip:
+  pretrained_model_name_or_path: CompVis/stable-diffusion-v1-4
+  subfolder: text_encoder
+
+vae:
+  pretrained_model_name_or_path: CompVis/stable-diffusion-v1-4
+  subfolder: vae
+
+unet:
+  pretrained_model_name_or_path: CompVis/stable-diffusion-v1-4
+  subfolder: unet
+
+feature_extractor:
+  pretrained_model_name_or_path: openai/clip-vit-base-patch32

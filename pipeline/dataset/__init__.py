@@ -2,6 +2,7 @@ from .dataset import DreamBoothDataset
 from .transformation import (
     ImageTransform,
     ImageReverseTransform,
-    PreprocessorTransform
+    PreprocessorTransform,
+    DreamboothCollate
 )
 from .preprocessor import Preprocessor

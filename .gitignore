@@ -6,3 +6,4 @@ pipeline/data
 
 db.sqlite3
 **.pyc
+.vscode/settings.json

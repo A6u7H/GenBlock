@@ -1,10 +1,11 @@
+import torch
 import torchvision.transforms as T
 import numpy as np
 import cv2
 
 from torch import Tensor
 from PIL import Image
-from typing import Tuple
+from typing import Tuple, Callable, Dict, Any
 
 
 class PreprocessorTransform:
@@ -39,6 +40,7 @@ class PreprocessorTransform:
         image[image.sum(2) == 0] = self.background_color
         return image
 
+
 class ImageTransform:
     def __init__(self, size: Tuple[int, int]) -> None:
         self.transpose = T.Compose([
@@ -63,3 +65,26 @@ class ImageReverseTransform:
 
     def __call__(self, image: Image) -> Tensor:
         return self.transpose(image)
+
+
+class DreamboothCollate:
+    def __init__(self, tokenizer: Callable) -> None:
+        self.tokenizer = tokenizer
+
+    def __call__(self, items) -> Dict[str, Any]:
+        pixel_values = [item["instance_images"] for item in items]
+        pixel_values = torch.stack(pixel_values)
+        pixel_values = pixel_values.to(
+            memory_format=torch.contiguous_format
+        ).float()
+
+        input_ids = [item["instance_prompt_ids"] for item in items]
+        input_ids = self.tokenizer.pad(
+            {"input_ids": input_ids}, padding=True, return_tensors="pt"
+        ).input_ids
+
+        batch = {
+            "input_ids": input_ids,
+            "pixel_values": pixel_values,
+        }
+        return batch
