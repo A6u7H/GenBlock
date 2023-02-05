@@ -12,8 +12,7 @@ from pipeline.dataset import (
     ImageTransform
 )
 
-login()
-
+# login()
 logger = logging.getLogger(__name__)
 
 with open("./configs/models.yaml", 'r') as stream:
@@ -23,12 +22,13 @@ with open("./configs/trainer.yaml", 'r') as stream:
     trainer_config = yaml.safe_load(stream)
 
 
-data_path = ""
-save_path = ""
+data_path = "/home/dkrivenkov/program/genlock/pipeline/data/Shields_preprocessed"
 
-name_of_your_concept = "shieldd"
-type_of_thing = "from game"
-instance_prompt = f"a picture of {name_of_your_concept} {type_of_thing}"
+asset_type = "shield"
+extra_information = "from 2D game, front"
+instance_prompt = f"a picture of {asset_type} {extra_information}"
+
+save_path = f"/home/dkrivenkov/program/genlock/saved_models/{asset_type}"
 
 if __name__ == "__main__":
     logger.info("Loading models...")

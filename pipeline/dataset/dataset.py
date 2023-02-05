@@ -4,13 +4,13 @@ import torch
 from torch.utils.data import Dataset
 from PIL import Image
 
-from typing import Callable
+from typing import Callable, List, Any
 
 
 class DreamBoothDataset(Dataset):
     def __init__(
         self,
-        data_path: str,
+        images: List[Any],
         instance_prompt: str,
         tokenizer: Callable,
         transforms: Callable
@@ -19,16 +19,18 @@ class DreamBoothDataset(Dataset):
         self.tokenizer = tokenizer
         self.transforms = transforms
 
-        file_names = os.listdir(data_path)
-        self.images = list(map(
-            lambda x: os.path.join(data_path, x),
-            file_names
-        ))
+        self.images = images
+        # file_names = os.listdir(data_path)
+        # self.images = list(map(
+        #     lambda x: os.path.join(data_path, x),
+        #     file_names
+        # ))
 
     def __getitem__(self, index):
         example = {}
-        image_path = self.images[index]
-        image = Image.open(image_path)
+        # image_path = self.images[index]
+        # image = Image.open(image_path)
+        image = self.images[index]
 
         prompt_seq = self.tokenizer(
             self.instance_prompt,

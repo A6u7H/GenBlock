@@ -15,14 +15,18 @@ st.title("Generate 2D Game Assets")
 dataset_path = streamlit_config["dataset_path"]
 
 
-def upload_request(uploaded_files: List[str]):
+def upload_request(uploaded_files: List[str], asset_type: str):
     url = streamlit_config["backend_hostname"] + \
         streamlit_config["upload_endpoint"]
     files = [
         ('images', file.getvalue())
         for file in uploaded_files
     ]
-    result = requests.post(url, files=files)
+    result = requests.post(
+        url,
+        files=files,
+        data={"asset_type": asset_type}
+    )
     return result
 
 
@@ -49,14 +53,8 @@ if __name__ == "__main__":
             for i, image_file in enumerate(group):
                 cols[i].image(image_file)
 
-        result = upload_request(uploaded_files)
-
-    with st.sidebar:
-        datasets_names = os.listdir(dataset_path)
-        selected_dataset = st.selectbox(
-            label="Select dataset",
-            options=datasets_names
-        )
-
-        if st.button("Start Training"):
-            st.write("PReSsed")
+        with st.sidebar:
+            asset_type = st.text_input(label="Asset type")
+            if asset_type != "":
+                if st.button("Generate"):
+                    images = upload_request(uploaded_files, asset_type)

@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import UploadView
+from .views import TrainModelView
 
 urlpatterns = [
-    path('api/v1/upload', UploadView.as_view(), name='prediction'),
+    path('api/v1/upload', TrainModelView.as_view(), name='prediction'),
 ]
