@@ -18,18 +18,10 @@ class DreamBoothDataset(Dataset):
         self.instance_prompt = instance_prompt
         self.tokenizer = tokenizer
         self.transforms = transforms
-
         self.images = images
-        # file_names = os.listdir(data_path)
-        # self.images = list(map(
-        #     lambda x: os.path.join(data_path, x),
-        #     file_names
-        # ))
 
     def __getitem__(self, index):
         example = {}
-        # image_path = self.images[index]
-        # image = Image.open(image_path)
         image = self.images[index]
 
         prompt_seq = self.tokenizer(

@@ -2,7 +2,8 @@
 backend_hostname: http://127.0.0.1:8000
 
 # Endpoints
-upload_endpoint: /api/v1/upload
+train_endpoint: /api/v1/train
+generate_endpoint: /api/v1/generate
 
 
-dataset_path: /home/dkrivenkov/program/genlock/pipeline/data
+existing_model: /home/dkrivenkov/program/genlock/model
