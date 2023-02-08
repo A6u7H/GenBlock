@@ -33,7 +33,6 @@ def train_request(uploaded_files: List[str], asset_type: str):
 def generate_request(asset_type: str):
     url = streamlit_config["backend_hostname"] + \
         streamlit_config["generate_endpoint"]
-    print(url, asset_type)
     result = requests.post(
         url,
         json={"asset_type": asset_type}  # diferent between json and data
@@ -77,6 +76,7 @@ if __name__ == "__main__":
                 if st.button("Generate"):
                     images = generate_request(selected_dataset)
 
+        if uploaded_files:
             asset_type = st.text_input(label="Asset type")
             if asset_type != "":
                 if st.button("Train"):

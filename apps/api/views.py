@@ -92,7 +92,7 @@ class TrainModelView(APIView):
         files = request.data.getlist("images")
         asset_type = request.data.get("asset_type")
         save_path = f"./model/{asset_type}"
-        extra_information = "from 2D game, front"
+        extra_information = "from 2D game"
         instance_prompt = f"a picture of {asset_type} {extra_information}"
 
         images = []
@@ -136,7 +136,7 @@ class GenereateView(APIView):
             revision="fp16",
         ).to("cuda")
 
-        extra_information = "from 2D game, front"
+        extra_information = "from 2d game"
         prompt = f"a picture of {asset_type} {extra_information}, cinema4D, HD, front, ultra hd, hight resolution"
 
         def dummy(images, **kwargs):

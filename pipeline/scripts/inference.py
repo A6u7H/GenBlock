@@ -18,9 +18,9 @@ with open("./configs/trainer.yaml", 'r') as stream:
 data_path = "/home/dkrivenkov/program/genlock/pipeline/data/Shields_preprocessed"
 save_path = "/home/dkrivenkov/program/genlock/pipeline/data/Save_shields"
 
-name_of_your_concept = "shieldd"
-type_of_thing = "from game"
-prompt = f"a picture of {name_of_your_concept} {type_of_thing}, cinema4D, HD, front, ultra hd, hight resolution"
+name_of_your_concept = "shield"
+type_of_thing = "from 2D game"
+prompt = f"a picture of {name_of_your_concept} {type_of_thing}, cinema4D, HD, front, ultrahd, hight resolution"
 guidance_scale = 5
 num_cols = 25
 
