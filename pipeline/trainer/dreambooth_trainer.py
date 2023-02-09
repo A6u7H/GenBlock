@@ -8,7 +8,7 @@ from accelerate import Accelerator
 from accelerate.utils import set_seed
 from torch.utils.data import DataLoader, Dataset
 from tqdm.auto import tqdm
-from diffusers import DDPMScheduler, PNDMScheduler, StableDiffusionPipeline
+from diffusers import PNDMScheduler, StableDiffusionPipeline
 from diffusers.pipelines.stable_diffusion import StableDiffusionSafetyChecker
 from typing import Dict, Any, Callable
 
@@ -170,7 +170,6 @@ class DreamboothTrainer:
             unet, optimizer, self.loader
         )
 
-        # Move text_encode and vae to gpu
         text_encoder.to(accelerator.device)
         vae.to(accelerator.device)
 
