@@ -10,7 +10,8 @@ from transformers import CLIPFeatureExtractor, CLIPTextModel, CLIPTokenizer
 from diffusers import (
     AutoencoderKL,
     UNet2DConditionModel,
-    StableDiffusionPipeline
+    StableDiffusionPipeline,
+    DDPMScheduler
 )
 from rest_framework.parsers import (
     MultiPartParser,
@@ -53,14 +54,16 @@ class TrainModelView(APIView):
         text_encoder: Callable,
         vae: Callable,
         unet: Callable,
+        noise_scheduler: Callable,
         feature_extractor: Callable,
         instance_prompt: str,
         files: List[bytes],
         save_path: str,
         size: Tuple[int, int] = (256, 256)
     ):
+        background_color = (127.5, 127.5, 127.5)
         dreambooth_collate = DreamboothCollate(tokenizer)
-        transform = ImageTransform(size)
+        transform = ImageTransform(size, background_color)
         dataset = DreamBoothDataset(
             files,  # data_path
             instance_prompt,
@@ -74,6 +77,7 @@ class TrainModelView(APIView):
             text_encoder,
             vae,
             unet,
+            noise_scheduler,
             tokenizer,
             feature_extractor,
             save_path
@@ -85,6 +89,9 @@ class TrainModelView(APIView):
         text_encoder = CLIPTextModel.from_pretrained(**models_config["clip"])
         vae = AutoencoderKL.from_pretrained(**models_config["vae"])
         unet = UNet2DConditionModel.from_pretrained(**models_config["unet"])
+        noise_scheduler = DDPMScheduler(
+            **models_config["noise_scheduler"]
+        )
         feature_extractor = CLIPFeatureExtractor.from_pretrained(
             **models_config["feature_extractor"]
         )
@@ -106,6 +113,7 @@ class TrainModelView(APIView):
             text_encoder,
             vae,
             unet,
+            noise_scheduler,
             feature_extractor,
             instance_prompt,
             images,
@@ -137,7 +145,7 @@ class GenereateView(APIView):
         ).to("cuda")
 
         extra_information = "from 2d game"
-        prompt = f"a picture of {asset_type} {extra_information}, cinema4D, HD, front, ultra hd, hight resolution"
+        prompt = f"a picture of {asset_type} {extra_information}, cinema4D, hd, front"
 
         def dummy(images, **kwargs):
             return images, False

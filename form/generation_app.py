@@ -35,7 +35,7 @@ def generate_request(asset_type: str):
         streamlit_config["generate_endpoint"]
     result = requests.post(
         url,
-        json={"asset_type": asset_type}  # diferent between json and data
+        json={"asset_type": asset_type}
     )
     return result
 

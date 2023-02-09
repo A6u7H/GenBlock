@@ -1,9 +1,11 @@
 import torch
 import torchvision.transforms as T
+import albumentations as A
 import numpy as np
 import cv2
 
 from torch import Tensor
+from albumentations.pytorch.transforms import ToTensorV2
 from PIL import Image
 from typing import Tuple, Callable, Dict, Any
 
@@ -42,16 +44,41 @@ class PreprocessorTransform:
 
 
 class ImageTransform:
-    def __init__(self, size: Tuple[int, int]) -> None:
-        self.transpose = T.Compose([
-            T.Resize(size),
-            T.CenterCrop(size),
-            T.ToTensor(),
-            T.Lambda(lambda x: (x * 2) - 1)  # replace with Normilize()
+    def __init__(
+        self,
+        size: Tuple[int, int],
+        background_color: Tuple[float, float, float]
+    ) -> None:
+        self.background_color = background_color
+        self.transpose = A.Compose([
+            A.Resize(*size),
+            A.CenterCrop(*size),
+            A.Normalize(
+                mean=(0.5, 0.5, 0.5),
+                std=(0.5, 0.5, 0.5)
+            ),
+            ToTensorV2()
         ])
 
+    def add_padding(self, image):
+        h, w, _ = image.shape
+        padding = abs((h - w) // 2)
+        return cv2.copyMakeBorder(
+            image,
+            0,
+            0,
+            padding,
+            padding,
+            cv2.BORDER_CONSTANT,
+            value=[0, 0, 0]
+        )
+
     def __call__(self, image: Image) -> Tensor:
-        return self.transpose(image)
+        image = self.add_padding(
+            np.array(image)[1:-1, 1:-1, [0, 1, 2]]
+        )
+        image[image.sum(2) == 0] = self.background_color
+        return self.transpose(image=image)["image"]
 
 
 class ImageReverseTransform:
@@ -64,7 +91,7 @@ class ImageReverseTransform:
         ])
 
     def __call__(self, image: Image) -> Tensor:
-        return self.transpose(image)
+        return self.transpose(image=image)["image"]
 
 
 class DreamboothCollate:
