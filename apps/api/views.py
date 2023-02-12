@@ -1,6 +1,8 @@
 import io
+import os
 import torch
 import yaml
+import base64
 
 from PIL import Image
 from typing import Tuple, Callable, List
@@ -30,16 +32,6 @@ with open("./configs/models.yaml", 'r') as stream:
 
 with open("./configs/trainer.yaml", 'r') as stream:
     trainer_config = yaml.safe_load(stream)
-
-
-def image_grid(imgs, rows, cols):
-    assert len(imgs) == rows * cols
-    w, h = imgs[0].size
-    grid = Image.new("RGB", size=(cols * w, rows * h))
-    grid_w, grid_h = grid.size
-    for i, img in enumerate(imgs):
-        grid.paste(img, box=(i % cols * w, i // cols * h))
-    return grid
 
 
 class TrainModelView(APIView):
@@ -132,12 +124,12 @@ class GenereateView(APIView):
     )
 
     @staticmethod
-    def post(request):
+    def post(request, asset_type):
         guidance_scale = 7
-        num_cols = 25
 
-        asset_type = request.data.get("asset_type")
         save_path = f"./model/{asset_type}"
+        if not os.path.exists(save_path):
+            return Response({"status": "faild"}, status=404)
         pipe = StableDiffusionPipeline.from_pretrained(
             save_path,
             torch_dtype=torch.float16,
@@ -151,13 +143,14 @@ class GenereateView(APIView):
             return images, False
 
         pipe.safety_checker = dummy
-        all_images = []
-        for _ in range(num_cols):
-            images = pipe(prompt, guidance_scale=guidance_scale).images
-            all_images.extend(images)
-        grid = image_grid(all_images, 5, 5)
-        grid.save("123213.jpg")
+        image = pipe(prompt, guidance_scale=guidance_scale).images[0]
+
+        buffer = io.BytesIO()
+        image.save(buffer, format="JPEG")
+        image_base64 = base64.b64encode(
+            buffer.getvalue()
+        ).decode("utf-8")
 
         return Response({
-            'status': 'success'
+            "image": image_base64
         }, status=201)

@@ -1,9 +1,13 @@
 import os
+import cv2
+import numpy as np
+import base64
 import requests
 import logging
 import streamlit as st
 import yaml
 
+from PIL import Image
 from typing import List
 
 logger = logging.getLevelName(__name__)
@@ -32,12 +36,8 @@ def train_request(uploaded_files: List[str], asset_type: str):
 
 def generate_request(asset_type: str):
     url = streamlit_config["backend_hostname"] + \
-        streamlit_config["generate_endpoint"]
-    result = requests.post(
-        url,
-        json={"asset_type": asset_type}
-    )
-    return result
+        streamlit_config["generate_endpoint"] + f"/{asset_type}/"
+    return requests.post(url)
 
 
 if __name__ == "__main__":
@@ -74,10 +74,22 @@ if __name__ == "__main__":
 
             if selected_dataset:
                 if st.button("Generate"):
-                    images = generate_request(selected_dataset)
+                    gen_response = generate_request(selected_dataset)
 
         if uploaded_files:
             asset_type = st.text_input(label="Asset type")
             if asset_type != "":
                 if st.button("Train"):
-                    images = train_request(uploaded_files, asset_type)
+                    train_response = train_request(uploaded_files, asset_type)
+
+    try:
+        if gen_response.status_code == 201:
+            nparr = np.fromstring(base64.b64decode(
+                gen_response.json()["image"]
+            ), np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            cv2.imwrite("1.jpg", img)
+            pil_img = Image.fromarray(img)
+            st.image(pil_img)
+    except:
+        pass
