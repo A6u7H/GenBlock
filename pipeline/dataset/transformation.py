@@ -41,11 +41,14 @@ class ImageTransform:
         )
 
     def __call__(self, image: Image) -> Tensor:
-        image = self.add_padding(
-            np.array(image)[1:-1, 1:-1, [0, 1, 2]]
+        image_rgb = image[:, :, [2, 1, 0]].astype(np.uint8)
+        mask = (image[:, :, 3] > 0).astype(np.uint8)
+        image_mask = cv2.bitwise_and(
+            image_rgb,
+            image_rgb,
+            mask=mask
         )
-        image[image.sum(2) == 0] = self.background_color
-        return self.transpose(image=image)["image"]
+        return self.transpose(image=image_mask)["image"]
 
 
 class ImageReverseTransform:
@@ -58,7 +61,7 @@ class ImageReverseTransform:
         ])
 
     def __call__(self, image: Image) -> Tensor:
-        return self.transpose(image=image)["image"]
+        return self.transpose(image)
 
 
 class DreamboothCollate:

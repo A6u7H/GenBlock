@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
     try:
         if gen_response.status_code == 201:
-            nparr = np.fromstring(base64.b64decode(
+            nparr = np.frombuffer(base64.b64decode(
                 gen_response.json()["image"]
             ), np.uint8)
             img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
