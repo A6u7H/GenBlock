@@ -10,12 +10,15 @@ import yaml
 from PIL import Image
 from typing import List
 
+# st.set_page_config(page_title="Collections", page_icon="🖼")
+# st.set_page_config(page_title="Generate collections", page_icon="🚀")
+
 logger = logging.getLevelName(__name__)
 
 with open("./configs/streamlit.yaml", 'r') as stream:
     streamlit_config = yaml.safe_load(stream)
 
-st.title("Generate 2D Game Assets")
+st.title("Genlock - we can change the game")
 existen_models = streamlit_config["existing_model"]
 
 
@@ -88,7 +91,6 @@ if __name__ == "__main__":
                 gen_response.json()["image"]
             ), np.uint8)
             img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-            cv2.imwrite("1.jpg", img)
             pil_img = Image.fromarray(img)
             st.image(pil_img)
     except:
