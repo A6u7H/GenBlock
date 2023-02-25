@@ -6,4 +6,5 @@ train_endpoint: /api/v1/train
 generate_endpoint: /api/v1/generate
 
 
-existing_model: /home/dkrivenkov/program/genlock/model
+existing_model: ./collections
+collections_path: ./collections

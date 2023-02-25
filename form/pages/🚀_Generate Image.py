@@ -1,13 +1,16 @@
 import streamlit as st
-import time
+import cv2
+import os
 import yaml
 import numpy as np
 import base64
 import requests
 
-from typing import List
+from PIL import Image
+from streamlit_image_select import image_select
 
-st.set_page_config(page_title="Create collection", page_icon="🖼")
+
+st.set_page_config(page_title="Generate Image", page_icon="🚀")
 
 
 @st.experimental_memo
@@ -16,13 +19,13 @@ def get_img_as_base64(file):
         data = f.read()
     return base64.b64encode(data).decode()
 
+bg_img = get_img_as_base64("./form/images/cool-background.png")
 
-img = get_img_as_base64("./form/images/cool-background.png")
 page_bg_img = f"""
 <style>
 [data-testid="stAppViewContainer"] > .main {{
-background-image: url("data:image/png;base64,{img}");
-background-position: center; 
+background-image: url("data:image/png;base64,{bg_img}");
+background-position: center;
 background-repeat: no-repeat;
 background-attachment: fixed;
 }}
@@ -33,50 +36,82 @@ st.markdown(page_bg_img, unsafe_allow_html=True)
 with open("./configs/streamlit.yaml", 'r') as stream:
     streamlit_config = yaml.safe_load(stream)
 
-existen_models = streamlit_config["existing_model"]
+collections_path = streamlit_config["collections_path"]
 
 
-def train_request(uploaded_files: List[str], asset_type: str):
+def generate_request(asset_type: str):
     url = streamlit_config["backend_hostname"] + \
-        streamlit_config["train_endpoint"]
-    files = [
-        ('images', file.getvalue())
-        for file in uploaded_files
-    ]
-    result = requests.post(
-        url,
-        files=files,
-        data={"asset_type": asset_type}
+        streamlit_config["generate_endpoint"] + f"/{asset_type}/"
+    return requests.post(url)
+
+
+preview_images = []
+captions = []
+for model_name in os.listdir(collections_path):
+    image_path = os.path.join(collections_path, model_name, "images", "1.png")
+    preview_images.append(
+        image_path
     )
-    return result
+    captions.append(model_name)
 
 
-asset_type = st.text_input(label="Colection name", value="The name will be used as an object name")
-uploaded_files = st.file_uploader(
-    "Please choose a file",
-    accept_multiple_files=True,
-    label_visibility="hidden"
+img_path = image_select(
+    "Existing Collections 🖼",
+    preview_images,
+    captions=captions,
+    use_container_width=False
 )
 
-if uploaded_files:
-    n = st.slider(
-        label="Select a number of image in raw",
-        min_value=1,
-        max_value=len(uploaded_files) + 1,
-        value=(len(uploaded_files) + 1) // 2,
-        label_visibility="hidden",
-    )
+asset_type = img_path.split("/")[2]
 
-    groups = []
-    for i in range(0, len(uploaded_files), n):
-        groups.append(uploaded_files[i: i + n])
+st.markdown(
+    """
+    <span style="font-weight:bold;">Your wallet</span>
+    """,
+    unsafe_allow_html=True
+)
+st.code('''0xd5c962029b823bf5''', language='bash')
 
-    for group in groups:
-        cols = st.columns(n)
-        for i, image_file in enumerate(group):
-            cols[i].image(image_file)
+st.markdown(
+    """
+    <span style="font-weight:bold;">Collection name</span>
+    """,
+    unsafe_allow_html=True
+)
+st.code(f'''{asset_type}''', language='bash')
+
+st.markdown(
+    """
+    <span style="font-weight:bold;">Generation endpoint</span>
+    """,
+    unsafe_allow_html=True
+)
+code = '''http://127.0.0.1:8000/api/v1/generate/{asset_type}/'''
+st.code(code, language='bash')
 
 
-if uploaded_files and asset_type:
-    if st.button("Train"):
-        train_response = train_request(uploaded_files, asset_type)
+col1, col2, col3 = st.columns(3)
+response = None
+with col2:
+    if st.button("Generate"):
+        response = generate_request(asset_type)
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    if response and response.status_code == 201:
+        nparr = np.frombuffer(base64.b64decode(
+            response.json()["image"]
+        ), np.uint8)
+        img = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)[:, :, [2, 1, 0, 3]]
+        pil_img = Image.fromarray(img)
+        st.image(pil_img)
+
+with col3:
+    if response and response.status_code == 201:
+        st.markdown(
+            """
+            <span style="font-weight:bold;">Item info</span>
+            """,
+            unsafe_allow_html=True
+        )

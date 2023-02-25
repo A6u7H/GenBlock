@@ -1,10 +1,11 @@
 import streamlit as st
-import time
+import io
+import os
 import yaml
-import numpy as np
 import base64
 import requests
 
+from PIL import Image
 from typing import List
 
 st.set_page_config(page_title="Create collection", page_icon="🖼")
@@ -58,6 +59,7 @@ uploaded_files = st.file_uploader(
     label_visibility="hidden"
 )
 
+
 if uploaded_files:
     n = st.slider(
         label="Select a number of image in raw",
@@ -79,4 +81,9 @@ if uploaded_files:
 
 if uploaded_files and asset_type:
     if st.button("Train"):
+        images_path = os.path.join(existen_models, asset_type, "images")
+        os.makedirs(images_path)
+        for i, file in enumerate(uploaded_files):
+            image = Image.open(io.BytesIO(file.getvalue()))
+            image.save(os.path.join(images_path, f"{i}.png"))
         train_response = train_request(uploaded_files, asset_type)
