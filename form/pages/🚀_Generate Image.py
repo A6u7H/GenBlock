@@ -48,6 +48,8 @@ def generate_request(asset_type: str):
 preview_images = []
 captions = []
 for model_name in os.listdir(collections_path):
+    if model_name == "test":
+        continue
     image_path = os.path.join(collections_path, model_name, "images", "1.png")
     preview_images.append(
         image_path
@@ -86,7 +88,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
-code = '''http://127.0.0.1:8000/api/v1/generate/{asset_type}/'''
+code = f'''http://www.genlock.me/api/v1/generate/{asset_type}/'''
 st.code(code, language='bash')
 
 
@@ -94,24 +96,27 @@ col1, col2, col3 = st.columns(3)
 response = None
 with col2:
     if st.button("Generate"):
-        response = generate_request(asset_type)
+        response = {
+            "image": "image"
+        }
+        # response = generate_request(asset_type)
 
 col1, col2, col3 = st.columns(3)
 
-with col1:
-    if response and response.status_code == 201:
-        nparr = np.frombuffer(base64.b64decode(
-            response.json()["image"]
-        ), np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)[:, :, [2, 1, 0, 3]]
-        pil_img = Image.fromarray(img)
-        st.image(pil_img)
+# with col1:
+    # if response and response.status_code == 201:
+        # nparr = np.frombuffer(base64.b64decode(
+        #     response.json()["image"]
+        # ), np.uint8)
+        # img = cv2.imdecode(nparr, cv2.IMREAD_UNCHANGED)[:, :, [2, 1, 0, 3]]
+        # pil_img = Image.fromarray(img)
+        # st.image(pil_img)
 
-with col3:
-    if response and response.status_code == 201:
-        st.markdown(
-            """
-            <span style="font-weight:bold;">Item info</span>
-            """,
-            unsafe_allow_html=True
-        )
+# with col3:
+#     if response and response.status_code == 201:
+#         st.markdown(
+#             """
+#             <span style="font-weight:bold;">Item info</span>
+#             """,
+#             unsafe_allow_html=True
+#         )
