@@ -107,7 +107,7 @@ class TrainModelView(APIView):
         files = request.data.getlist("images")
         asset_type = request.data.get("asset_type")
         save_path = os.path.join(storage_config["save_path"], asset_type)
-        instance_prompt = f"{asset_type}, front, front view, game, item, game, item"
+        instance_prompt = f"{asset_type}, game, 2D, front, front view, item, prop, hd"
 
         images = []
         for file in files:
@@ -151,14 +151,13 @@ class GenereateView(APIView):
             revision="fp16",
         ).to("cuda")
 
-        extra_information = "from 2d game"
-        prompt = f"a picture of {asset_type}, {extra_information}, front, front view, ultra detailed, symmetrical, colorful, hd, full size, epic, black background, cinematic 4D"
+        prompt = f"{asset_type}, icon, prop, item, clear boundaries"
 
         def dummy(images, **kwargs):
             return images, False
 
         pipe.safety_checker = dummy
-        image = pipe(prompt, guidance_scale=guidance_scale).images[0]
+        image = pipe(prompt, guidance_scale=guidance_scale, num_inference_steps=300).images[0]
 
         clean_image = rembg.remove(
             image,
@@ -176,7 +175,6 @@ class GenereateView(APIView):
         min_y, max_y = np.min(y_arr), np.max(y_arr)
         clean_image = clean_image[min_x: max_x, min_y:max_y, :]
         clean_image = Image.fromarray(clean_image)
-        clean_image = clean_image.resize((256, 256))
 
         buffer = io.BytesIO()
         clean_image.save(buffer, format="PNG")
