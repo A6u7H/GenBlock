@@ -19,7 +19,6 @@ class ImageTransform:
         self.background_color = background_color
         self.transpose = A.Compose([
             A.Resize(*size),
-            A.CenterCrop(*size),
             A.Normalize(
                 mean=(0.5, 0.5, 0.5),
                 std=(0.5, 0.5, 0.5)
