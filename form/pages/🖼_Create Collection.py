@@ -80,17 +80,10 @@ if uploaded_files:
 
 
 if uploaded_files and asset_type:
-    col1, col2, col3 = st.columns(3)
-    with col2:
-        is_train_envent = st.button("Train")
-        if is_train_envent:
-            images_path = os.path.join(existen_models, "test", "images")
-            os.makedirs(images_path)
-            for i, file in enumerate(uploaded_files):
-                image = Image.open(io.BytesIO(file.getvalue()))
-                image.save(os.path.join(images_path, f"{i}.png"))
-        for _ in range(100000):
-            pass
-    if is_train_envent:
-        st.info(f'Your {asset_type} collection is ready now', icon="ℹ️")
-    # train_response = train_request(uploaded_files, asset_type)
+    if st.button("Train"):
+        images_path = os.path.join(existen_models, asset_type, "images")
+        os.makedirs(images_path)
+        for i, file in enumerate(uploaded_files):
+            image = Image.open(io.BytesIO(file.getvalue()))
+            image.save(os.path.join(images_path, f"{i}.png"))
+        train_response = train_request(uploaded_files, asset_type)
