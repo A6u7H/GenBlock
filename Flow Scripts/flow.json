@@ -1,0 +1,37 @@
+{
+	"emulators": {
+		"default": {
+			"port": 3569,
+			"serviceAccount": "emulator-account"
+		}
+	},
+	"contracts": {
+		"BottomShot": "./contracts/BottomShot.cdc",
+		"Genlock": "./contracts/Genlock.cdc",
+		"GenlockTest": "./contracts/GenlockTest.cdc",
+		"GenlockFinal": "./contracts/GenlockFinal.cdc"
+	},
+	"networks": {
+		"emulator": "127.0.0.1:3569",
+		"mainnet": "access.mainnet.nodes.onflow.org:9000",
+		"sandboxnet": "access.sandboxnet.nodes.onflow.org:9000",
+		"testnet": "access.devnet.nodes.onflow.org:9000"
+	},
+	"accounts": {
+		"emulator-account": {
+			"address": "f8d6e0586b0a20c7",
+			"key": "123"
+		},
+		"testnet-account": {
+			"address": "0xd5c962029b823bf5",
+			"key": "123"
+		}
+	},
+	"deployments": {
+		"testnet": {
+			"testnet-account": [
+				"GenlockFinal"
+			]
+		}
+	}
+}
