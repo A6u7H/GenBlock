@@ -1,1 +1,2 @@
-bucket_name: "nft-game-assets"
+bucket_name: nft-game-assets
+save_path: ./collections
