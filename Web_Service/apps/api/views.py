@@ -38,17 +38,17 @@ from nft_deployer.pyfift.nft.nft_deploy import DeployNFTMessage
 
 load_dotenv()
 
-with open("./configs/models.yaml", 'r') as stream:
+with open("./Web_Service/configs/models.yaml", 'r') as stream:
     models_config = yaml.safe_load(stream)
 
-with open("./configs/trainer.yaml", 'r') as stream:
+with open("./Web_Service/configs/trainer.yaml", 'r') as stream:
     trainer_config = yaml.safe_load(stream)
 
-with open("./configs/storage.yaml", 'r') as stream:
+with open("./Web_Service/configs/storage.yaml", 'r') as stream:
     storage_config = yaml.safe_load(stream)
 
-nft_config = "./configs/nft/config.json"
-os.environ["FIFTPATH"] = "/home/dkrivenkov/program/genlock/nft_deployer/fift-libs"
+nft_config = "./Web_Service/configs/nft/config.json"
+os.environ["FIFTPATH"] = "./Web_Service/nft_deployer/pyfift"
 
 storage_client = storage.Client()
 bucket = storage_client.get_bucket(storage_config["bucket_name"])
@@ -222,7 +222,7 @@ class GenereateView(APIView):
         state = App.lite_client.state(address)
         nft_collection_addr = ""
         msg_body = DeployNFTMessage(
-            index=max_metadata_idx + 1,
+            index=max_metadata_idx + 2,
             content_url=f"{max_metadata_idx + 1}.json",
             amount=50000000,
             owner=owner_addrs,
