@@ -31,6 +31,10 @@ from pipeline.dataset import (
     ImageTransform
 )
 
+from nft_deployer.pyfift.base.app import App
+from nft_deployer.pyfift.wallet.wallet_v3_r2 import WalletV3R2
+from nft_deployer.pyfift.nft.nft_deploy import DeployNFTMessage
+
 
 load_dotenv()
 
@@ -140,6 +144,9 @@ class GenereateView(APIView):
 
     @staticmethod
     def post(request, asset_type):
+
+        owner_addrs = request.data.get("owner_addrs")
+
         guidance_scale = 7
 
         save_path = os.path.join(storage_config["save_path"], asset_type)
@@ -157,7 +164,11 @@ class GenereateView(APIView):
             return images, False
 
         pipe.safety_checker = dummy
-        image = pipe(prompt, guidance_scale=guidance_scale, num_inference_steps=300).images[0]
+        image = pipe(
+            prompt,
+            guidance_scale=guidance_scale,
+            num_inference_steps=50
+        ).images[0]
 
         clean_image = rembg.remove(
             image,
@@ -184,14 +195,39 @@ class GenereateView(APIView):
         ).decode("utf-8")
 
         blobs = storage_client.list_blobs("nft-game-assets")
-        max_idx = 0
+        max_metadata_idx = max_img_idx = 0
         for blob in blobs:
             if blob.name.startswith("images/") and blob.name.endswith(".png"):
                 image_name = blob.name.split("images/")[1]
-                max_idx = max(int(image_name[:-4]), max_idx)
+                max_img_idx = max(int(image_name[:-4]), max_img_idx)
+            if blob.name.startswith("metadata/") and blob.name.endswith(".json"):
+                metadata_name = blob.name.split("metadata/")[1]
+                max_metadata_idx = max(int(metadata_name[:-5]), max_metadata_idx)
 
-        new_blob = bucket.blob(f"images/{max_idx + 1}.png")
-        new_blob.upload_from_string(buffer.getvalue(), content_type="image/png")
+        new_blob = bucket.blob(f"images/{max_img_idx + 1}.png")
+        new_blob.upload_from_string(
+            buffer.getvalue(),
+            content_type="image/png"
+        )
+
+        new_blob = bucket.blob(f"metadata/{max_metadata_idx + 1}.json")
+        with open('my_nft.json', 'rb') as f:
+            new_blob.upload_from_file(f)
+
+        App.init(config=nft_config)
+        wallet = WalletV3R2()
+        wallet.init_data()
+
+        address = wallet.address(binary=False)
+        state = App.lite_client.state(address)
+        nft_collection_addr = ""
+        msg_body = DeployNFTMessage(
+            index=max_metadata_idx + 1,
+            content_url=f"{max_metadata_idx + 1}.json",
+            amount=50000000,
+            owner=owner_addrs,
+        ).to_boc()
+        wallet.send_to_contract(msg_body, 50000000, nft_collection_addr)
 
         return Response({
             "image": image_base64,
